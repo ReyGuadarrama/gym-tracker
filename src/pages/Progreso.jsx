@@ -4,6 +4,7 @@ import Card from '../components/Card';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { formatPeso, formatNumero, formatVolumen } from '../utils/formatters';
 
 export default function Progreso() {
   const { entrenamientos } = useApp();
@@ -117,19 +118,19 @@ export default function Progreso() {
             <Card>
               <p className="text-sm text-gray-600">Peso Máximo</p>
               <p className="text-2xl font-bold text-blue-600">
-                {estadisticas.pesoMaximo} kg
+                {formatPeso(estadisticas.pesoMaximo)} kg
               </p>
             </Card>
             <Card>
               <p className="text-sm text-gray-600">Reps Máximas</p>
               <p className="text-2xl font-bold text-green-600">
-                {estadisticas.repsMaximas}
+                {formatNumero(estadisticas.repsMaximas)}
               </p>
             </Card>
             <Card>
               <p className="text-sm text-gray-600">Volumen Total</p>
               <p className="text-2xl font-bold text-purple-600">
-                {estadisticas.volumenTotal} kg
+                {formatVolumen(estadisticas.volumenTotal)} kg
               </p>
             </Card>
             <Card>
@@ -155,7 +156,7 @@ export default function Progreso() {
                 <Tooltip
                   contentStyle={{ backgroundColor: 'white', border: '1px solid #ccc' }}
                   formatter={(value, name) => {
-                    if (name === 'peso') return [`${value} kg`, 'Peso'];
+                    if (name === 'peso') return [`${formatPeso(value)} kg`, 'Peso'];
                     return [value, name];
                   }}
                 />
@@ -182,7 +183,7 @@ export default function Progreso() {
                 <Tooltip
                   contentStyle={{ backgroundColor: 'white', border: '1px solid #ccc' }}
                   formatter={(value, name) => {
-                    if (name === 'reps') return [`${value} reps`, 'Repeticiones'];
+                    if (name === 'reps') return [`${formatNumero(value)} reps`, 'Repeticiones'];
                     return [value, name];
                   }}
                 />
@@ -209,7 +210,7 @@ export default function Progreso() {
                 <Tooltip
                   contentStyle={{ backgroundColor: 'white', border: '1px solid #ccc' }}
                   formatter={(value, name) => {
-                    if (name === 'volumen') return [`${value} kg`, 'Volumen'];
+                    if (name === 'volumen') return [`${formatVolumen(value)} kg`, 'Volumen'];
                     return [value, name];
                   }}
                 />
@@ -244,10 +245,10 @@ export default function Progreso() {
                     <tr key={idx} className="border-t">
                       <td className="px-4 py-2">{dato.fecha}</td>
                       <td className="px-4 py-2">Serie {dato.serie}</td>
-                      <td className="px-4 py-2 text-right font-medium">{dato.peso}</td>
-                      <td className="px-4 py-2 text-right">{dato.reps}</td>
+                      <td className="px-4 py-2 text-right font-medium">{formatPeso(dato.peso)}</td>
+                      <td className="px-4 py-2 text-right">{formatNumero(dato.reps)}</td>
                       <td className="px-4 py-2 text-right text-purple-600 font-medium">
-                        {dato.volumen}
+                        {formatVolumen(dato.volumen)}
                       </td>
                     </tr>
                   ))}

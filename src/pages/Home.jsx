@@ -5,6 +5,7 @@ import Button from '../components/Button';
 import { Calendar, Dumbbell, TrendingUp, List, Zap, Trophy, Target, Flame } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { formatTiempoLegible } from '../utils/formatters';
 
 export default function Home() {
   const { rutinas, entrenamientos, calendario } = useApp();
@@ -143,7 +144,7 @@ export default function Home() {
                 </p>
                 {ultimoEntrenamiento.tiempoTotal && (
                   <p className="text-sm text-gray-600">
-                    ⏱️ Duración: {Math.floor(ultimoEntrenamiento.tiempoTotal / 60)}min {ultimoEntrenamiento.tiempoTotal % 60}s
+                    ⏱️ Duración: {formatTiempoLegible(ultimoEntrenamiento.tiempoTotal)}
                   </p>
                 )}
               </div>

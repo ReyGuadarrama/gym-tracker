@@ -6,6 +6,7 @@ import Input from '../components/Input';
 import Timer from '../components/Timer';
 import Stopwatch from '../components/Stopwatch';
 import { Check, ChevronRight, Clock } from 'lucide-react';
+import { formatPeso, formatNumero } from '../utils/formatters';
 
 export default function Entrenar() {
   const {
@@ -219,7 +220,7 @@ export default function Entrenar() {
             <div className="space-y-1">
               {ejercicio.ultimoEntrenamiento.series.map((serie, idx) => (
                 <p key={idx} className="text-sm text-blue-700">
-                  Serie {idx + 1}: {serie.peso}kg × {serie.reps} reps
+                  Serie {idx + 1}: {formatPeso(serie.peso)}kg × {formatNumero(serie.reps)} reps
                 </p>
               ))}
             </div>
@@ -257,7 +258,7 @@ export default function Entrenar() {
             {ejercicio.series.map((serie, idx) => (
               <div key={idx} className="flex items-center text-sm text-gray-600 mb-1">
                 <Check size={16} className="text-green-600 mr-2" />
-                Serie {idx + 1}: {serie.peso}kg × {serie.reps} reps ({serie.tiempoSerie}s)
+                Serie {idx + 1}: {formatPeso(serie.peso)}kg × {formatNumero(serie.reps)} reps ({serie.tiempoSerie}s)
               </div>
             ))}
           </div>
