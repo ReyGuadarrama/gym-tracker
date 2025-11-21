@@ -25,13 +25,13 @@ export default function Layout() {
         </div>
       </header>
 
-      <main className="flex-1 w-full px-4 py-6 animate-fade-in overflow-x-hidden">
+      <main className="flex-1 w-full px-4 py-6 pb-24 animate-fade-in overflow-x-hidden">
         <div className="max-w-7xl mx-auto">
           <Outlet />
         </div>
       </main>
 
-      <nav className="bg-white/90 backdrop-blur-md border-t-2 border-blue-100 sticky bottom-0 shadow-2xl w-full safe-area-bottom">
+      <nav className="bg-white/90 backdrop-blur-md border-t-2 border-blue-100 fixed bottom-0 left-0 right-0 shadow-2xl w-full safe-area-bottom z-50">
         <div className="max-w-7xl mx-auto px-1">
           <div className="flex justify-around py-2">
             {navLinks.map(({ to, icon: Icon, label }) => (

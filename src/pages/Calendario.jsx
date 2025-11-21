@@ -4,7 +4,7 @@ import Card from '../components/Card';
 import Button from '../components/Button';
 import { format, addDays, startOfWeek, endOfWeek, isSameDay } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 
 export default function Calendario() {
   const { rutinas, calendario, programarRutina } = useApp();
@@ -45,21 +45,25 @@ export default function Calendario() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col space-y-4">
         <h2 className="text-2xl font-bold text-gray-900">Calendario</h2>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center justify-center space-x-3">
           <Button
             variant="secondary"
             onClick={() => setSemanaActual(addDays(semanaActual, -7))}
+            className="!p-2 md:!p-3 flex-shrink-0"
           >
             <ChevronLeft size={20} />
           </Button>
-          <span className="text-sm font-medium px-4">
-            {format(inicioSemana, 'd MMM', { locale: es })} - {format(finSemana, 'd MMM yyyy', { locale: es })}
-          </span>
+          <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2.5 rounded-xl shadow-lg min-w-[180px] md:min-w-[220px] text-center">
+            <span className="text-sm md:text-base font-semibold whitespace-nowrap">
+              {format(inicioSemana, 'd MMM', { locale: es })} - {format(finSemana, 'd MMM yyyy', { locale: es })}
+            </span>
+          </div>
           <Button
             variant="secondary"
             onClick={() => setSemanaActual(addDays(semanaActual, 7))}
+            className="!p-2 md:!p-3 flex-shrink-0"
           >
             <ChevronRight size={20} />
           </Button>
