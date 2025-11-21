@@ -15,83 +15,83 @@ export default function Home() {
   const ultimoEntrenamiento = entrenamientos[entrenamientos.length - 1];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 w-full">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-3xl p-8 text-white shadow-2xl relative overflow-hidden">
+      <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-2xl md:rounded-3xl p-6 md:p-8 text-white shadow-2xl relative overflow-hidden">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="relative z-10">
-          <div className="flex items-center space-x-3 mb-3">
-            <Flame className="animate-bounce" size={32} />
-            <h2 className="text-4xl font-extrabold">
+          <div className="flex items-center space-x-2 mb-2">
+            <Flame className="animate-bounce flex-shrink-0" size={28} />
+            <h2 className="text-2xl md:text-4xl font-extrabold">
               ¡Vamos a Entrenar!
             </h2>
           </div>
-          <p className="text-xl text-white/90 mb-4 font-medium">
+          <p className="text-base md:text-xl text-white/90 mb-3 md:mb-4 font-medium">
             {format(new Date(), "EEEE, d 'de' MMMM 'de' yyyy", { locale: es })}
           </p>
-          <p className="text-white/80 text-lg">
+          <p className="text-white/80 text-sm md:text-lg">
             Tu progreso comienza hoy. Cada repetición cuenta. 💪
           </p>
         </div>
-        <div className="absolute top-0 right-0 opacity-10">
+        <div className="absolute top-0 right-0 opacity-10 hidden md:block">
           <Dumbbell size={200} />
         </div>
       </div>
 
       {/* Tarjetas de Estadísticas */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="border-l-4 border-blue-500 hover:scale-105 transition-transform">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-600 text-sm font-medium mb-1">Rutinas</p>
-              <p className="text-4xl font-extrabold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+        <Card className="border-l-4 border-blue-500">
+          <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <p className="text-gray-600 text-xs md:text-sm font-medium mb-1">Rutinas</p>
+              <p className="text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
                 {rutinas.length}
               </p>
             </div>
-            <div className="bg-blue-100 p-3 rounded-xl">
-              <List className="text-blue-600" size={28} />
+            <div className="bg-blue-100 p-2.5 md:p-3 rounded-xl flex items-center justify-center flex-shrink-0">
+              <List className="text-blue-600" size={24} />
             </div>
           </div>
         </Card>
 
-        <Card className="border-l-4 border-green-500 hover:scale-105 transition-transform">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-600 text-sm font-medium mb-1">Entrenamientos</p>
-              <p className="text-4xl font-extrabold bg-gradient-to-r from-green-600 to-emerald-400 bg-clip-text text-transparent">
+        <Card className="border-l-4 border-green-500">
+          <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <p className="text-gray-600 text-xs md:text-sm font-medium mb-1">Entrenamientos</p>
+              <p className="text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-green-600 to-emerald-400 bg-clip-text text-transparent">
                 {entrenamientos.length}
               </p>
             </div>
-            <div className="bg-green-100 p-3 rounded-xl">
-              <Dumbbell className="text-green-600" size={28} />
+            <div className="bg-green-100 p-2.5 md:p-3 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Dumbbell className="text-green-600" size={24} />
             </div>
           </div>
         </Card>
 
-        <Card className="border-l-4 border-purple-500 hover:scale-105 transition-transform">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-600 text-sm font-medium mb-1">Programados</p>
-              <p className="text-4xl font-extrabold bg-gradient-to-r from-purple-600 to-pink-400 bg-clip-text text-transparent">
+        <Card className="border-l-4 border-purple-500">
+          <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <p className="text-gray-600 text-xs md:text-sm font-medium mb-1">Programados</p>
+              <p className="text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-purple-600 to-pink-400 bg-clip-text text-transparent">
                 {calendario.length}
               </p>
             </div>
-            <div className="bg-purple-100 p-3 rounded-xl">
-              <Calendar className="text-purple-600" size={28} />
+            <div className="bg-purple-100 p-2.5 md:p-3 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Calendar className="text-purple-600" size={24} />
             </div>
           </div>
         </Card>
 
-        <Card className="border-l-4 border-orange-500 hover:scale-105 transition-transform">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-600 text-sm font-medium mb-1">Racha</p>
-              <p className="text-4xl font-extrabold bg-gradient-to-r from-orange-600 to-red-400 bg-clip-text text-transparent">
+        <Card className="border-l-4 border-orange-500">
+          <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <p className="text-gray-600 text-xs md:text-sm font-medium mb-1">Racha</p>
+              <p className="text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-orange-600 to-red-400 bg-clip-text text-transparent">
                 {entrenamientos.length > 0 ? Math.min(entrenamientos.length, 7) : 0}
               </p>
             </div>
-            <div className="bg-orange-100 p-3 rounded-xl">
-              <Flame className="text-orange-600" size={28} />
+            <div className="bg-orange-100 p-2.5 md:p-3 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Flame className="text-orange-600" size={24} />
             </div>
           </div>
         </Card>

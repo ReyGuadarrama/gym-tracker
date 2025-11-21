@@ -1,7 +1,7 @@
 export default function Card({ children, className = '', title, ...props }) {
   return (
     <div
-      className={`bg-white/90 backdrop-blur-sm rounded-2xl shadow-card hover:shadow-xl transition-all duration-300 p-6 border border-gray-100 ${className}`}
+      className={`bg-white/90 backdrop-blur-sm rounded-2xl shadow-card hover:shadow-xl transition-all duration-300 p-4 md:p-6 border border-gray-100 ${className}`}
       {...props}
     >
       {title && (

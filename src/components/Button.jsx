@@ -9,7 +9,7 @@ export default function Button({ children, variant = 'primary', className = '', 
 
   return (
     <button
-      className={`px-5 py-3 rounded-xl font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${variants[variant]} ${className}`}
+      className={`px-4 py-2.5 md:px-5 md:py-3 rounded-xl font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${variants[variant]} ${className}`}
       {...props}
     >
       {children}

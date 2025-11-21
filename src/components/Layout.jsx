@@ -11,42 +11,44 @@ export default function Layout() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="bg-white/80 backdrop-blur-md shadow-lg sticky top-0 z-10 border-b-2 border-blue-100">
-        <div className="max-w-7xl mx-auto px-4 py-5">
+    <div className="min-h-screen flex flex-col overflow-x-hidden">
+      <header className="bg-white/80 backdrop-blur-md shadow-lg sticky top-0 z-50 border-b-2 border-blue-100 w-full">
+        <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center space-x-3">
-            <div className="bg-gradient-to-br from-blue-600 to-purple-600 p-2 rounded-xl shadow-lg">
-              <Dumbbell className="text-white" size={28} />
+            <div className="bg-gradient-to-br from-blue-600 to-purple-600 p-2 rounded-xl shadow-lg flex-shrink-0">
+              <Dumbbell className="text-white" size={24} />
             </div>
-            <h1 className="text-3xl font-extrabold text-gradient">
+            <h1 className="text-2xl font-extrabold text-gradient">
               Gym Tracker
             </h1>
           </div>
         </div>
       </header>
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 py-8 animate-fade-in">
-        <Outlet />
+      <main className="flex-1 w-full px-4 py-6 animate-fade-in overflow-x-hidden">
+        <div className="max-w-7xl mx-auto">
+          <Outlet />
+        </div>
       </main>
 
-      <nav className="bg-white/90 backdrop-blur-md border-t-2 border-blue-100 sticky bottom-0 shadow-2xl">
-        <div className="max-w-7xl mx-auto px-2">
-          <div className="flex justify-around py-3">
+      <nav className="bg-white/90 backdrop-blur-md border-t-2 border-blue-100 sticky bottom-0 shadow-2xl w-full safe-area-bottom">
+        <div className="max-w-7xl mx-auto px-1">
+          <div className="flex justify-around py-2">
             {navLinks.map(({ to, icon: Icon, label }) => (
               <NavLink
                 key={to}
                 to={to}
                 end={to === '/'}
                 className={({ isActive }) =>
-                  `flex flex-col items-center py-3 px-5 rounded-xl transition-all duration-300 ${
+                  `flex flex-col items-center py-2 px-2 rounded-xl transition-all duration-300 min-w-0 ${
                     isActive
-                      ? 'bg-gradient-to-br from-blue-600 to-purple-600 text-white shadow-glow scale-105'
-                      : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50 hover:scale-105'
+                      ? 'bg-gradient-to-br from-blue-600 to-purple-600 text-white shadow-glow'
+                      : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
                   }`
                 }
               >
-                <Icon size={24} strokeWidth={2.5} />
-                <span className="text-xs font-semibold mt-1">{label}</span>
+                <Icon size={22} strokeWidth={2.5} />
+                <span className="text-xs font-semibold mt-1 truncate">{label}</span>
               </NavLink>
             ))}
           </div>
