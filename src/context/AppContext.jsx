@@ -140,6 +140,101 @@ export const AppProvider = ({ children }) => {
     return `~${minutos} min`;
   };
 
+  // Métricas motivantes
+  const calcularVolumenMensual = () => {
+    const hoy = new Date();
+    const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+
+    const entrenamientosMes = entrenamientos.filter(e => {
+      const fechaEntrenamiento = new Date(e.fecha);
+      return fechaEntrenamiento >= inicioMes;
+    });
+
+    let volumenTotal = 0;
+    entrenamientosMes.forEach(entrenamiento => {
+      entrenamiento.ejercicios.forEach(ejercicio => {
+        ejercicio.series.forEach(serie => {
+          volumenTotal += serie.peso * serie.reps;
+        });
+      });
+    });
+
+    return Math.round(volumenTotal);
+  };
+
+  const calcularRachaActual = () => {
+    if (entrenamientos.length === 0) return 0;
+
+    // Ordenar entrenamientos por fecha descendente
+    const entrenamientosOrdenados = [...entrenamientos].sort((a, b) =>
+      new Date(b.fecha) - new Date(a.fecha)
+    );
+
+    // Obtener fechas únicas (un entrenamiento por día)
+    const fechasUnicas = [...new Set(entrenamientosOrdenados.map(e =>
+      new Date(e.fecha).toISOString().split('T')[0]
+    ))];
+
+    let racha = 0;
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+
+    for (let i = 0; i < fechasUnicas.length; i++) {
+      const fechaEntrenamiento = new Date(fechasUnicas[i]);
+      fechaEntrenamiento.setHours(0, 0, 0, 0);
+
+      const diferenciaDias = Math.floor((hoy - fechaEntrenamiento) / (1000 * 60 * 60 * 24));
+
+      if (diferenciaDias === racha) {
+        racha++;
+      } else {
+        break;
+      }
+    }
+
+    return racha;
+  };
+
+  const calcularProgresoSemanal = () => {
+    const hoy = new Date();
+    const inicioSemana = new Date(hoy);
+    inicioSemana.setDate(hoy.getDate() - hoy.getDay() + 1); // Lunes
+    inicioSemana.setHours(0, 0, 0, 0);
+
+    const entrenamientosSemana = entrenamientos.filter(e => {
+      const fechaEntrenamiento = new Date(e.fecha);
+      return fechaEntrenamiento >= inicioSemana;
+    });
+
+    // Obtener fechas únicas
+    const fechasUnicas = new Set(entrenamientosSemana.map(e =>
+      new Date(e.fecha).toISOString().split('T')[0]
+    ));
+
+    return {
+      completados: fechasUnicas.size,
+      objetivo: 5, // Meta de 5 entrenamientos por semana
+      porcentaje: Math.min((fechasUnicas.size / 5) * 100, 100)
+    };
+  };
+
+  const calcularTiempoMensual = () => {
+    const hoy = new Date();
+    const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+
+    const entrenamientosMes = entrenamientos.filter(e => {
+      const fechaEntrenamiento = new Date(e.fecha);
+      return fechaEntrenamiento >= inicioMes;
+    });
+
+    const tiempoTotal = entrenamientosMes.reduce((sum, e) => sum + (e.tiempoTotal || 0), 0);
+
+    const horas = Math.floor(tiempoTotal / 3600);
+    const minutos = Math.floor((tiempoTotal % 3600) / 60);
+
+    return { horas, minutos, total: tiempoTotal };
+  };
+
   const value = {
     rutinas,
     calendario,
@@ -154,6 +249,10 @@ export const AppProvider = ({ children }) => {
     obtenerHistorialEjercicio,
     obtenerTiempoPromedioRutina,
     formatearTiempoEstimado,
+    calcularVolumenMensual,
+    calcularRachaActual,
+    calcularProgresoSemanal,
+    calcularTiempoMensual,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

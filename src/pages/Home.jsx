@@ -1,18 +1,41 @@
 import { useApp } from '../context/AppContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Card from '../components/Card';
 import Button from '../components/Button';
-import { Calendar, Dumbbell, TrendingUp, List, Zap, Trophy, Target, Flame } from 'lucide-react';
+import { Calendar, Dumbbell, TrendingUp, List, Zap, Trophy, Target, Flame, Weight, Clock, Award } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { formatTiempoLegible } from '../utils/formatters';
 
 export default function Home() {
-  const { rutinas, entrenamientos, calendario } = useApp();
+  const {
+    rutinas,
+    entrenamientos,
+    calendario,
+    calcularVolumenMensual,
+    calcularRachaActual,
+    calcularProgresoSemanal,
+    calcularTiempoMensual
+  } = useApp();
+
+  const navigate = useNavigate();
 
   const hoy = format(new Date(), 'yyyy-MM-dd');
-  const rutinaHoy = calendario.find(c => c.fecha === hoy);
+  const programacionHoy = calendario.find(c => c.fecha === hoy);
+  const rutinaHoy = programacionHoy ? rutinas.find(r => r.id === programacionHoy.rutinaId) : null;
   const ultimoEntrenamiento = entrenamientos[entrenamientos.length - 1];
+
+  // Verificar si el entrenamiento de hoy ya fue completado
+  const entrenamientoHoyCompletado = rutinaHoy ? entrenamientos.some(e => {
+    const fechaEntrenamiento = format(new Date(e.fecha), 'yyyy-MM-dd');
+    return fechaEntrenamiento === hoy && e.rutinaId === rutinaHoy.id;
+  }) : false;
+
+  // Calcular métricas motivantes
+  const volumenMensual = calcularVolumenMensual();
+  const rachaActual = calcularRachaActual();
+  const progresoSemanal = calcularProgresoSemanal();
+  const tiempoMensual = calcularTiempoMensual();
 
   return (
     <div className="space-y-6 w-full">
@@ -38,67 +61,94 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Tarjetas de Estadísticas */}
+      {/* Tarjetas de Estadísticas Motivantes */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-        <Card className="border-l-4 border-blue-500">
+        {/* Volumen Mensual - Peso total levantado */}
+        <Card className="border-l-4 border-blue-500 bg-gradient-to-br from-blue-50 to-blue-100">
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0 flex-1">
-              <p className="text-gray-600 text-xs md:text-sm font-medium mb-1">Rutinas</p>
-              <p className="text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
-                {rutinas.length}
+              <p className="text-gray-600 text-xs md:text-sm font-medium mb-1">Volumen del Mes</p>
+              <p className="text-2xl md:text-3xl font-extrabold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
+                {volumenMensual > 0 ? (
+                  <>
+                    {volumenMensual >= 1000
+                      ? `${(volumenMensual / 1000).toFixed(1)}t`
+                      : `${volumenMensual}kg`
+                    }
+                  </>
+                ) : '0kg'}
               </p>
+              <p className="text-xs text-gray-500 mt-0.5">Levantados 💪</p>
             </div>
-            <div className="bg-blue-100 p-2.5 md:p-3 rounded-xl flex items-center justify-center flex-shrink-0">
-              <List className="text-blue-600" size={24} />
+            <div className="bg-blue-600 p-2.5 md:p-3 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
+              <Weight className="text-white" size={24} />
             </div>
           </div>
         </Card>
 
-        <Card className="border-l-4 border-green-500">
+        {/* Racha Actual */}
+        <Card className="border-l-4 border-orange-500 bg-gradient-to-br from-orange-50 to-red-100">
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0 flex-1">
-              <p className="text-gray-600 text-xs md:text-sm font-medium mb-1">Entrenamientos</p>
-              <p className="text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-green-600 to-emerald-400 bg-clip-text text-transparent">
-                {entrenamientos.length}
+              <p className="text-gray-600 text-xs md:text-sm font-medium mb-1">Racha Actual</p>
+              <p className="text-2xl md:text-3xl font-extrabold bg-gradient-to-r from-orange-600 to-red-500 bg-clip-text text-transparent">
+                {rachaActual} {rachaActual === 1 ? 'día' : 'días'}
+              </p>
+              <p className="text-xs text-gray-500 mt-0.5">
+                {rachaActual > 0 ? '¡Sigue así! 🔥' : 'Comienza hoy'}
               </p>
             </div>
-            <div className="bg-green-100 p-2.5 md:p-3 rounded-xl flex items-center justify-center flex-shrink-0">
-              <Dumbbell className="text-green-600" size={24} />
+            <div className="bg-gradient-to-br from-orange-500 to-red-500 p-2.5 md:p-3 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
+              <Flame className="text-white" size={24} />
             </div>
           </div>
         </Card>
 
-        <Card className="border-l-4 border-purple-500">
+        {/* Meta Semanal */}
+        <Card className="border-l-4 border-purple-500 bg-gradient-to-br from-purple-50 to-pink-100">
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0 flex-1">
-              <p className="text-gray-600 text-xs md:text-sm font-medium mb-1">Programados</p>
-              <p className="text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-purple-600 to-pink-400 bg-clip-text text-transparent">
-                {calendario.length}
+              <p className="text-gray-600 text-xs md:text-sm font-medium mb-1">Meta Semanal</p>
+              <p className="text-2xl md:text-3xl font-extrabold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
+                {progresoSemanal.completados}/{progresoSemanal.objetivo}
               </p>
+              <div className="mt-1.5">
+                <div className="w-full bg-gray-200 rounded-full h-1.5">
+                  <div
+                    className="bg-gradient-to-r from-purple-600 to-pink-500 h-1.5 rounded-full transition-all"
+                    style={{ width: `${progresoSemanal.porcentaje}%` }}
+                  ></div>
+                </div>
+              </div>
             </div>
-            <div className="bg-purple-100 p-2.5 md:p-3 rounded-xl flex items-center justify-center flex-shrink-0">
-              <Calendar className="text-purple-600" size={24} />
+            <div className="bg-gradient-to-br from-purple-600 to-pink-500 p-2.5 md:p-3 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
+              <Target className="text-white" size={24} />
             </div>
           </div>
         </Card>
 
-        <Card className="border-l-4 border-orange-500">
+        {/* Tiempo Mensual */}
+        <Card className="border-l-4 border-green-500 bg-gradient-to-br from-green-50 to-emerald-100">
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0 flex-1">
-              <p className="text-gray-600 text-xs md:text-sm font-medium mb-1">Racha</p>
-              <p className="text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-orange-600 to-red-400 bg-clip-text text-transparent">
-                {entrenamientos.length > 0 ? Math.min(entrenamientos.length, 7) : 0}
+              <p className="text-gray-600 text-xs md:text-sm font-medium mb-1">Tiempo del Mes</p>
+              <p className="text-2xl md:text-3xl font-extrabold bg-gradient-to-r from-green-600 to-emerald-500 bg-clip-text text-transparent">
+                {tiempoMensual.horas > 0
+                  ? `${tiempoMensual.horas}h ${tiempoMensual.minutos}m`
+                  : `${tiempoMensual.minutos}m`
+                }
               </p>
+              <p className="text-xs text-gray-500 mt-0.5">Entrenando ⏱️</p>
             </div>
-            <div className="bg-orange-100 p-2.5 md:p-3 rounded-xl flex items-center justify-center flex-shrink-0">
-              <Flame className="text-orange-600" size={24} />
+            <div className="bg-gradient-to-br from-green-600 to-emerald-500 p-2.5 md:p-3 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
+              <Clock className="text-white" size={24} />
             </div>
           </div>
         </Card>
       </div>
 
       {/* Entrenamiento de Hoy */}
-      {rutinaHoy && (
+      {rutinaHoy && !entrenamientoHoyCompletado && (
         <Card className="bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-blue-200">
           <div className="flex items-start space-x-4">
             <div className="bg-gradient-to-br from-blue-600 to-purple-600 p-4 rounded-2xl shadow-lg">
@@ -109,17 +159,47 @@ export default function Home() {
                 <h3 className="text-2xl font-bold text-gray-900">¡Rutina de Hoy!</h3>
                 <Zap className="text-yellow-500" size={24} />
               </div>
+              <p className="text-gray-700 font-medium mb-1">{rutinaHoy.nombre}</p>
               <p className="text-gray-600 mb-4">
-                Es momento de dar lo mejor de ti. Tu cuerpo te lo agradecerá.
+                {rutinaHoy.ejercicios.length} ejercicios • Es momento de dar lo mejor de ti 💪
               </p>
-              <Link to="/entrenar">
-                <Button className="w-full md:w-auto">
-                  <div className="flex items-center space-x-2">
-                    <Dumbbell size={20} />
-                    <span>Iniciar Entrenamiento</span>
-                  </div>
-                </Button>
-              </Link>
+              <Button
+                className="w-full md:w-auto"
+                onClick={() => navigate('/entrenar', { state: { rutinaPreseleccionada: rutinaHoy } })}
+              >
+                <div className="flex items-center space-x-2">
+                  <Dumbbell size={20} />
+                  <span>Iniciar Entrenamiento</span>
+                </div>
+              </Button>
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {/* Entrenamiento Completado */}
+      {rutinaHoy && entrenamientoHoyCompletado && (
+        <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-400">
+          <div className="flex items-start space-x-4">
+            <div className="bg-gradient-to-br from-green-600 to-emerald-600 p-4 rounded-2xl shadow-lg animate-bounce">
+              <Trophy className="text-white" size={32} />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center space-x-2 mb-2">
+                <h3 className="text-2xl font-bold text-green-800">¡Entrenamiento Completado!</h3>
+                <Award className="text-yellow-500" size={24} />
+              </div>
+              <p className="text-green-700 font-medium mb-1">{rutinaHoy.nombre}</p>
+              <p className="text-green-600 mb-2">
+                ¡Excelente trabajo! Has completado tu rutina de hoy. 🎉
+              </p>
+              <div className="flex flex-wrap gap-2 text-sm text-green-700">
+                <span className="bg-green-200 px-3 py-1 rounded-full font-medium">✓ {rutinaHoy.ejercicios.length} ejercicios</span>
+                <span className="bg-green-200 px-3 py-1 rounded-full font-medium">🔥 Racha: {rachaActual} días</span>
+              </div>
+              <p className="text-green-600 mt-3 text-sm italic">
+                "El éxito es la suma de pequeños esfuerzos repetidos día tras día."
+              </p>
             </div>
           </div>
         </Card>
