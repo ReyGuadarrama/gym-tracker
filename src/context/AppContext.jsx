@@ -235,6 +235,40 @@ export const AppProvider = ({ children }) => {
     return { horas, minutos, total: tiempoTotal };
   };
 
+  // Funciones para gestión/eliminación de datos
+  const eliminarEntrenamiento = (entrenamientoId) => {
+    setEntrenamientos(entrenamientos.filter(e => e.id !== entrenamientoId));
+  };
+
+  const eliminarEntrenamientosPorEjercicio = (nombreEjercicio) => {
+    // Eliminar entrenamientos que SOLO contengan ese ejercicio
+    // Si un entrenamiento tiene múltiples ejercicios, solo removemos el ejercicio específico
+    const entrenamientosActualizados = entrenamientos.map(entrenamiento => {
+      const ejerciciosFiltrados = entrenamiento.ejercicios.filter(
+        ej => ej.nombre !== nombreEjercicio
+      );
+
+      // Si el entrenamiento tenía solo ese ejercicio, lo marcamos para eliminación
+      if (ejerciciosFiltrados.length === 0) {
+        return null;
+      }
+
+      // Si tenía más ejercicios, devolvemos el entrenamiento sin ese ejercicio
+      return {
+        ...entrenamiento,
+        ejercicios: ejerciciosFiltrados
+      };
+    }).filter(e => e !== null); // Eliminar entrenamientos marcados como null
+
+    setEntrenamientos(entrenamientosActualizados);
+  };
+
+  const limpiarTodosLosDatos = () => {
+    setEntrenamientos([]);
+    // Opcionalmente también limpiar el calendario
+    // setCalendario([]);
+  };
+
   const value = {
     rutinas,
     calendario,
@@ -253,6 +287,9 @@ export const AppProvider = ({ children }) => {
     calcularRachaActual,
     calcularProgresoSemanal,
     calcularTiempoMensual,
+    eliminarEntrenamiento,
+    eliminarEntrenamientosPorEjercicio,
+    limpiarTodosLosDatos,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
