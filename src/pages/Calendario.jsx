@@ -1,13 +1,15 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import Card from '../components/Card';
 import Button from '../components/Button';
-import { format, addDays, startOfWeek, endOfWeek, isSameDay } from 'date-fns';
+import { format, addDays, startOfWeek, endOfWeek, isSameDay, startOfDay } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X, CheckCircle2, XCircle, PlayCircle } from 'lucide-react';
 
 export default function Calendario() {
-  const { rutinas, calendario, programarRutina } = useApp();
+  const { rutinas, calendario, programarRutina, entrenamientos } = useApp();
+  const navigate = useNavigate();
   const [semanaActual, setSemanaActual] = useState(new Date());
   const [fechaSeleccionada, setFechaSeleccionada] = useState(null);
   const [mostrarSelector, setMostrarSelector] = useState(false);
@@ -27,6 +29,23 @@ export default function Calendario() {
     const prog = calendario.find(c => c.fecha === fechaStr);
     if (!prog) return null;
     return rutinas.find(r => r.id === prog.rutinaId);
+  };
+
+  const verificarEntrenamientoCompletado = (fecha, rutinaId) => {
+    if (!rutinaId) return false;
+
+    const fechaStr = format(fecha, 'yyyy-MM-dd');
+
+    return entrenamientos.some(entrenamiento => {
+      const fechaEntrenamiento = format(new Date(entrenamiento.fecha), 'yyyy-MM-dd');
+      return fechaEntrenamiento === fechaStr && entrenamiento.rutinaId === rutinaId;
+    });
+  };
+
+  const esDiaPasado = (fecha) => {
+    const hoy = startOfDay(new Date());
+    const diaComparar = startOfDay(fecha);
+    return diaComparar < hoy;
   };
 
   const seleccionarRutina = (rutinaId) => {
@@ -85,15 +104,28 @@ export default function Calendario() {
         {diasSemana.map((dia, index) => {
           const rutinaDia = obtenerRutinaDia(dia);
           const esHoy = isSameDay(dia, new Date());
+          const esPasado = esDiaPasado(dia);
+          const fueCompletado = rutinaDia ? verificarEntrenamientoCompletado(dia, rutinaDia.id) : false;
+
+          // Determinar el estado visual
+          let borderColor = '';
+          let bgColor = '';
+          if (esHoy) {
+            borderColor = 'border-2 border-blue-500';
+          } else if (fueCompletado) {
+            borderColor = 'border-l-4 border-green-500';
+            bgColor = 'bg-green-50';
+          } else if (rutinaDia && esPasado) {
+            borderColor = 'border-l-4 border-orange-500';
+            bgColor = 'bg-orange-50';
+          }
 
           return (
             <Card
               key={index}
-              className={`cursor-pointer hover:shadow-md transition-shadow ${
-                esHoy ? 'border-2 border-blue-500' : ''
-              }`}
+              className={`cursor-pointer hover:shadow-md transition-shadow ${borderColor} ${bgColor}`}
               onClick={() => {
-                if (rutinas.length > 0) {
+                if (rutinas.length > 0 && !fueCompletado) {
                   setFechaSeleccionada(dia);
                   setMostrarSelector(true);
                 }
@@ -113,23 +145,56 @@ export default function Calendario() {
 
               {rutinaDia ? (
                 <div className="mt-3 pt-3 border-t">
+                  {/* Indicador de estado */}
+                  <div className="flex items-center justify-center mb-2">
+                    {fueCompletado ? (
+                      <div className="flex items-center text-green-600 text-xs font-medium">
+                        <CheckCircle2 size={14} className="mr-1" />
+                        Completado
+                      </div>
+                    ) : esPasado ? (
+                      <div className="flex items-center text-orange-600 text-xs font-medium">
+                        <XCircle size={14} className="mr-1" />
+                        No realizado
+                      </div>
+                    ) : null}
+                  </div>
+
                   <p className="text-sm font-medium text-gray-900 truncate">
                     {rutinaDia.nombre}
                   </p>
                   <p className="text-xs text-gray-600 mt-1">
                     {rutinaDia.ejercicios.length} ejercicios
                   </p>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (window.confirm('¿Eliminar esta programación?')) {
-                        eliminarProgramacion(dia);
-                      }
-                    }}
-                    className="text-xs text-red-600 hover:text-red-800 mt-2"
-                  >
-                    Eliminar
-                  </button>
+
+                  {/* Botón "Entrenar Ahora" solo para hoy */}
+                  {esHoy && !fueCompletado && (
+                    <Button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate('/entrenar', { state: { rutinaPreseleccionada: rutinaDia } });
+                      }}
+                      className="w-full mt-3 text-xs py-1.5 flex items-center justify-center"
+                    >
+                      <PlayCircle size={14} className="mr-1" />
+                      Entrenar Ahora
+                    </Button>
+                  )}
+
+                  {/* Botón eliminar solo si no fue completado */}
+                  {!fueCompletado && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (window.confirm('¿Eliminar esta programación?')) {
+                          eliminarProgramacion(dia);
+                        }
+                      }}
+                      className="text-xs text-red-600 hover:text-red-800 mt-2"
+                    >
+                      Eliminar
+                    </button>
+                  )}
                 </div>
               ) : (
                 <div className="mt-3 pt-3 border-t">

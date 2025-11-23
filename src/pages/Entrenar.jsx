@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import Card from '../components/Card';
 import Button from '../components/Button';
@@ -9,6 +10,7 @@ import { Check, ChevronRight, Clock } from 'lucide-react';
 import { formatPeso, formatNumero } from '../utils/formatters';
 
 export default function Entrenar() {
+  const location = useLocation();
   const {
     rutinas,
     guardarEntrenamiento,
@@ -22,6 +24,13 @@ export default function Entrenar() {
   const [mostrarDescanso, setMostrarDescanso] = useState(false);
   const [tiempoInicio, setTiempoInicio] = useState(null);
   const [formSerie, setFormSerie] = useState({ peso: '', reps: '' });
+
+  // Efecto para manejar la rutina preseleccionada desde el calendario
+  useEffect(() => {
+    if (location.state?.rutinaPreseleccionada && !rutinaSeleccionada) {
+      setRutinaSeleccionada(location.state.rutinaPreseleccionada);
+    }
+  }, [location.state]);
 
   useEffect(() => {
     if (rutinaSeleccionada && !tiempoInicio) {

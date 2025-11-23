@@ -11,36 +11,57 @@ export default function Rutinas() {
   const [rutinaEditando, setRutinaEditando] = useState(null);
   const [formData, setFormData] = useState({
     nombre: '',
-    ejercicios: [{ nombre: '', series: '', reps: '', descanso: '' }],
+    ejerciciosConfirmados: [],
+    ejercicioActual: { nombre: '', series: '', reps: '', descanso: '' },
   });
 
   const resetFormulario = () => {
     setFormData({
       nombre: '',
-      ejercicios: [{ nombre: '', series: '', reps: '', descanso: '' }],
+      ejerciciosConfirmados: [],
+      ejercicioActual: { nombre: '', series: '', reps: '', descanso: '' },
     });
     setMostrarFormulario(false);
     setRutinaEditando(null);
   };
 
-  const agregarEjercicio = () => {
+  const confirmarEjercicio = () => {
+    const { ejercicioActual } = formData;
+
+    // Validar que el ejercicio tenga al menos nombre, series y reps
+    if (!ejercicioActual.nombre.trim() || !ejercicioActual.series || !ejercicioActual.reps) {
+      alert('Por favor completa al menos el nombre, series y repeticiones del ejercicio');
+      return;
+    }
+
     setFormData({
       ...formData,
-      ejercicios: [...formData.ejercicios, { nombre: '', series: '', reps: '', descanso: '' }],
+      ejerciciosConfirmados: [...formData.ejerciciosConfirmados, ejercicioActual],
+      ejercicioActual: { nombre: '', series: '', reps: '', descanso: '' },
     });
   };
 
-  const eliminarEjercicio = (index) => {
+  const eliminarEjercicioConfirmado = (index) => {
     setFormData({
       ...formData,
-      ejercicios: formData.ejercicios.filter((_, i) => i !== index),
+      ejerciciosConfirmados: formData.ejerciciosConfirmados.filter((_, i) => i !== index),
     });
   };
 
-  const actualizarEjercicio = (index, campo, valor) => {
-    const nuevosEjercicios = [...formData.ejercicios];
-    nuevosEjercicios[index] = { ...nuevosEjercicios[index], [campo]: valor };
-    setFormData({ ...formData, ejercicios: nuevosEjercicios });
+  const editarEjercicioConfirmado = (index) => {
+    const ejercicio = formData.ejerciciosConfirmados[index];
+    setFormData({
+      ...formData,
+      ejerciciosConfirmados: formData.ejerciciosConfirmados.filter((_, i) => i !== index),
+      ejercicioActual: ejercicio,
+    });
+  };
+
+  const actualizarEjercicioActual = (campo, valor) => {
+    setFormData({
+      ...formData,
+      ejercicioActual: { ...formData.ejercicioActual, [campo]: valor },
+    });
   };
 
   const handleSubmit = (e) => {
@@ -51,18 +72,20 @@ export default function Rutinas() {
       return;
     }
 
-    const ejerciciosValidos = formData.ejercicios.filter(
-      ej => ej.nombre.trim() && ej.series && ej.reps
-    );
+    // Incluir el ejercicio actual si tiene datos válidos
+    let todosLosEjercicios = [...formData.ejerciciosConfirmados];
+    if (formData.ejercicioActual.nombre.trim() && formData.ejercicioActual.series && formData.ejercicioActual.reps) {
+      todosLosEjercicios.push(formData.ejercicioActual);
+    }
 
-    if (ejerciciosValidos.length === 0) {
+    if (todosLosEjercicios.length === 0) {
       alert('Por favor agrega al menos un ejercicio válido');
       return;
     }
 
     const rutina = {
       nombre: formData.nombre,
-      ejercicios: ejerciciosValidos.map(ej => ({
+      ejercicios: todosLosEjercicios.map(ej => ({
         nombre: ej.nombre,
         series: parseInt(ej.series),
         reps: parseInt(ej.reps),
@@ -81,14 +104,20 @@ export default function Rutinas() {
 
   const editarRutina = (rutina) => {
     setRutinaEditando(rutina);
+
+    // Si hay ejercicios, poner todos menos el último como confirmados
+    // y el último como el actual en edición
+    const ejerciciosMapeados = rutina.ejercicios.map(ej => ({
+      nombre: ej.nombre,
+      series: ej.series.toString(),
+      reps: ej.reps.toString(),
+      descanso: ej.descanso.toString(),
+    }));
+
     setFormData({
       nombre: rutina.nombre,
-      ejercicios: rutina.ejercicios.map(ej => ({
-        nombre: ej.nombre,
-        series: ej.series.toString(),
-        reps: ej.reps.toString(),
-        descanso: ej.descanso.toString(),
-      })),
+      ejerciciosConfirmados: ejerciciosMapeados,
+      ejercicioActual: { nombre: '', series: '', reps: '', descanso: '' },
     });
     setMostrarFormulario(true);
   };
@@ -118,68 +147,100 @@ export default function Rutinas() {
             />
 
             <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <h4 className="font-medium">Ejercicios</h4>
+              <h4 className="font-medium">Ejercicios</h4>
+
+              {/* Formulario del ejercicio actual - siempre arriba */}
+              <div className="p-4 border-2 border-blue-300 rounded-lg space-y-3 bg-blue-50">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-blue-700">
+                    {formData.ejerciciosConfirmados.length === 0 ? 'Primer Ejercicio' : 'Nuevo Ejercicio'}
+                  </span>
+                </div>
+
+                <Input
+                  label="Nombre del Ejercicio"
+                  value={formData.ejercicioActual.nombre}
+                  onChange={(e) => actualizarEjercicioActual('nombre', e.target.value)}
+                  placeholder="Ej: Sentadillas"
+                />
+
+                <div className="grid grid-cols-3 gap-2">
+                  <Input
+                    label="Series"
+                    type="number"
+                    min="1"
+                    value={formData.ejercicioActual.series}
+                    onChange={(e) => actualizarEjercicioActual('series', e.target.value)}
+                    placeholder="3"
+                  />
+                  <Input
+                    label="Repeticiones"
+                    type="number"
+                    min="1"
+                    value={formData.ejercicioActual.reps}
+                    onChange={(e) => actualizarEjercicioActual('reps', e.target.value)}
+                    placeholder="12"
+                  />
+                  <Input
+                    label="Descanso (seg)"
+                    type="number"
+                    min="0"
+                    value={formData.ejercicioActual.descanso}
+                    onChange={(e) => actualizarEjercicioActual('descanso', e.target.value)}
+                    placeholder="60"
+                  />
+                </div>
+
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={agregarEjercicio}
-                  className="text-sm"
+                  onClick={confirmarEjercicio}
+                  className="w-full text-sm bg-white"
                 >
                   <Plus size={16} className="inline mr-1" />
                   Agregar Ejercicio
                 </Button>
               </div>
 
-              {formData.ejercicios.map((ejercicio, index) => (
-                <div key={index} className="p-4 border border-gray-200 rounded-lg space-y-2">
-                  <div className="flex justify-between items-start">
-                    <Input
-                      label="Nombre del Ejercicio"
-                      value={ejercicio.nombre}
-                      onChange={(e) => actualizarEjercicio(index, 'nombre', e.target.value)}
-                      placeholder="Ej: Sentadillas"
-                      className="flex-1 mr-2"
-                    />
-                    {formData.ejercicios.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => eliminarEjercicio(index)}
-                        className="text-red-500 hover:text-red-700 mt-7"
-                      >
-                        <Trash2 size={20} />
-                      </button>
-                    )}
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-2">
-                    <Input
-                      label="Series"
-                      type="number"
-                      min="1"
-                      value={ejercicio.series}
-                      onChange={(e) => actualizarEjercicio(index, 'series', e.target.value)}
-                      placeholder="4"
-                    />
-                    <Input
-                      label="Repeticiones"
-                      type="number"
-                      min="1"
-                      value={ejercicio.reps}
-                      onChange={(e) => actualizarEjercicio(index, 'reps', e.target.value)}
-                      placeholder="12"
-                    />
-                    <Input
-                      label="Descanso (seg)"
-                      type="number"
-                      min="0"
-                      value={ejercicio.descanso}
-                      onChange={(e) => actualizarEjercicio(index, 'descanso', e.target.value)}
-                      placeholder="60"
-                    />
-                  </div>
+              {/* Lista de ejercicios confirmados - tarjetas pequeñas */}
+              {formData.ejerciciosConfirmados.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-sm text-gray-600 font-medium">
+                    Ejercicios agregados ({formData.ejerciciosConfirmados.length}):
+                  </p>
+                  {formData.ejerciciosConfirmados.map((ejercicio, index) => (
+                    <div
+                      key={index}
+                      className="p-3 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-between"
+                    >
+                      <div className="flex-1">
+                        <p className="font-medium text-gray-900">{ejercicio.nombre}</p>
+                        <p className="text-sm text-gray-600">
+                          {ejercicio.series} series × {ejercicio.reps} reps • {ejercicio.descanso || 60}s descanso
+                        </p>
+                      </div>
+                      <div className="flex space-x-2">
+                        <button
+                          type="button"
+                          onClick={() => editarEjercicioConfirmado(index)}
+                          className="text-blue-600 hover:text-blue-800"
+                          title="Editar ejercicio"
+                        >
+                          <Edit size={18} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => eliminarEjercicioConfirmado(index)}
+                          className="text-red-500 hover:text-red-700"
+                          title="Eliminar ejercicio"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
             </div>
 
             <div className="flex space-x-2">
