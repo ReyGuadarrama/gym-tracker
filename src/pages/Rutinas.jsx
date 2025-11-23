@@ -6,7 +6,7 @@ import Input from '../components/Input';
 import { Plus, Trash2, Edit, X } from 'lucide-react';
 
 export default function Rutinas() {
-  const { rutinas, agregarRutina, actualizarRutina, eliminarRutina } = useApp();
+  const { rutinas, agregarRutina, actualizarRutina, eliminarRutina, obtenerTiempoPromedioRutina, formatearTiempoEstimado } = useApp();
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [rutinaEditando, setRutinaEditando] = useState(null);
   const [formData, setFormData] = useState({
@@ -305,6 +305,17 @@ export default function Rutinas() {
                       </li>
                     ))}
                   </ul>
+
+                  {/* Tiempo estimado */}
+                  {(() => {
+                    const tiempoPromedio = obtenerTiempoPromedioRutina(rutina.id);
+                    const tiempoFormateado = formatearTiempoEstimado(tiempoPromedio);
+                    return tiempoFormateado ? (
+                      <p className="text-xs text-blue-600 font-medium mt-2 pt-2 border-t">
+                        ⏱ Duración estimada: {tiempoFormateado}
+                      </p>
+                    ) : null;
+                  })()}
                 </div>
               </div>
             </Card>

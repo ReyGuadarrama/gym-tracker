@@ -8,7 +8,7 @@ import { es } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, X, CheckCircle2, XCircle, PlayCircle } from 'lucide-react';
 
 export default function Calendario() {
-  const { rutinas, calendario, programarRutina, entrenamientos } = useApp();
+  const { rutinas, calendario, programarRutina, entrenamientos, obtenerTiempoPromedioRutina, formatearTiempoEstimado } = useApp();
   const navigate = useNavigate();
   const [semanaActual, setSemanaActual] = useState(new Date());
   const [fechaSeleccionada, setFechaSeleccionada] = useState(null);
@@ -166,6 +166,17 @@ export default function Calendario() {
                   <p className="text-xs text-gray-600 mt-1">
                     {rutinaDia.ejercicios.length} ejercicios
                   </p>
+
+                  {/* Tiempo estimado */}
+                  {(() => {
+                    const tiempoPromedio = obtenerTiempoPromedioRutina(rutinaDia.id);
+                    const tiempoFormateado = formatearTiempoEstimado(tiempoPromedio);
+                    return tiempoFormateado ? (
+                      <p className="text-xs text-blue-600 mt-1 font-medium">
+                        ⏱ {tiempoFormateado}
+                      </p>
+                    ) : null;
+                  })()}
 
                   {/* Botón "Entrenar Ahora" solo para hoy */}
                   {esHoy && !fueCompletado && (

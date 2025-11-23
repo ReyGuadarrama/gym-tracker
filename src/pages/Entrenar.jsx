@@ -15,6 +15,8 @@ export default function Entrenar() {
     rutinas,
     guardarEntrenamiento,
     obtenerUltimoEntrenamiento,
+    obtenerTiempoPromedioRutina,
+    formatearTiempoEstimado,
   } = useApp();
 
   const [rutinaSeleccionada, setRutinaSeleccionada] = useState(null);
@@ -164,6 +166,18 @@ export default function Entrenar() {
                     </li>
                   )}
                 </ul>
+
+                {/* Tiempo estimado */}
+                {(() => {
+                  const tiempoPromedio = obtenerTiempoPromedioRutina(rutina.id);
+                  const tiempoFormateado = formatearTiempoEstimado(tiempoPromedio);
+                  return tiempoFormateado ? (
+                    <p className="text-sm text-blue-600 font-medium mb-3 pb-3 border-b">
+                      ⏱ Duración estimada: {tiempoFormateado}
+                    </p>
+                  ) : null;
+                })()}
+
                 <Button className="w-full">Comenzar</Button>
               </Card>
             ))}

@@ -117,6 +117,29 @@ export const AppProvider = ({ children }) => {
     return historial.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
   };
 
+  const obtenerTiempoPromedioRutina = (rutinaId) => {
+    const entrenamientosRutina = entrenamientos.filter(e => e.rutinaId === rutinaId);
+
+    if (entrenamientosRutina.length === 0) return null;
+
+    const tiempoTotal = entrenamientosRutina.reduce((sum, e) => sum + e.tiempoTotal, 0);
+    const promedio = Math.floor(tiempoTotal / entrenamientosRutina.length);
+
+    return promedio;
+  };
+
+  const formatearTiempoEstimado = (segundos) => {
+    if (!segundos) return null;
+
+    const horas = Math.floor(segundos / 3600);
+    const minutos = Math.floor((segundos % 3600) / 60);
+
+    if (horas > 0) {
+      return `~${horas}h ${minutos}min`;
+    }
+    return `~${minutos} min`;
+  };
+
   const value = {
     rutinas,
     calendario,
@@ -129,6 +152,8 @@ export const AppProvider = ({ children }) => {
     guardarEntrenamiento,
     obtenerUltimoEntrenamiento,
     obtenerHistorialEjercicio,
+    obtenerTiempoPromedioRutina,
+    formatearTiempoEstimado,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
