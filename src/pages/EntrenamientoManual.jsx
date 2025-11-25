@@ -4,7 +4,7 @@ import { useApp } from '../context/AppContext';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import Input from '../components/Input';
-import { Plus, X, Save, ChevronRight } from 'lucide-react';
+import { Plus, X, Save, ChevronRight, TrendingDown } from 'lucide-react';
 
 export default function EntrenamientoManual() {
   const navigate = useNavigate();
@@ -18,7 +18,7 @@ export default function EntrenamientoManual() {
   const [ejercicios, setEjercicios] = useState([
     {
       nombre: '',
-      series: [{ peso: '', reps: '', tiempoSerie: '' }],
+      series: [{ peso: '', reps: '', tiempoSerie: '', dropsets: [] }],
     },
   ]);
 
@@ -33,6 +33,7 @@ export default function EntrenamientoManual() {
             peso: '',
             reps: '',
             tiempoSerie: '',
+            dropsets: [],
           })),
         }));
         setEjercicios(ejerciciosPreLlenados);
@@ -42,7 +43,7 @@ export default function EntrenamientoManual() {
       setEjercicios([
         {
           nombre: '',
-          series: [{ peso: '', reps: '', tiempoSerie: '' }],
+          series: [{ peso: '', reps: '', tiempoSerie: '', dropsets: [] }],
         },
       ]);
     }
@@ -53,7 +54,7 @@ export default function EntrenamientoManual() {
       ...ejercicios,
       {
         nombre: '',
-        series: [{ peso: '', reps: '', tiempoSerie: '' }],
+        series: [{ peso: '', reps: '', tiempoSerie: '', dropsets: [] }],
       },
     ]);
   };
@@ -70,7 +71,7 @@ export default function EntrenamientoManual() {
 
   const agregarSerie = (ejercicioIdx) => {
     const nuevosEjercicios = [...ejercicios];
-    nuevosEjercicios[ejercicioIdx].series.push({ peso: '', reps: '', tiempoSerie: '' });
+    nuevosEjercicios[ejercicioIdx].series.push({ peso: '', reps: '', tiempoSerie: '', dropsets: [] });
     setEjercicios(nuevosEjercicios);
   };
 
@@ -85,6 +86,25 @@ export default function EntrenamientoManual() {
   const actualizarSerie = (ejercicioIdx, serieIdx, campo, valor) => {
     const nuevosEjercicios = [...ejercicios];
     nuevosEjercicios[ejercicioIdx].series[serieIdx][campo] = valor;
+    setEjercicios(nuevosEjercicios);
+  };
+
+  const agregarDropset = (ejercicioIdx, serieIdx) => {
+    const nuevosEjercicios = [...ejercicios];
+    nuevosEjercicios[ejercicioIdx].series[serieIdx].dropsets.push({ peso: '', reps: '' });
+    setEjercicios(nuevosEjercicios);
+  };
+
+  const eliminarDropset = (ejercicioIdx, serieIdx, dropsetIdx) => {
+    const nuevosEjercicios = [...ejercicios];
+    nuevosEjercicios[ejercicioIdx].series[serieIdx].dropsets =
+      nuevosEjercicios[ejercicioIdx].series[serieIdx].dropsets.filter((_, i) => i !== dropsetIdx);
+    setEjercicios(nuevosEjercicios);
+  };
+
+  const actualizarDropset = (ejercicioIdx, serieIdx, dropsetIdx, campo, valor) => {
+    const nuevosEjercicios = [...ejercicios];
+    nuevosEjercicios[ejercicioIdx].series[serieIdx].dropsets[dropsetIdx][campo] = valor;
     setEjercicios(nuevosEjercicios);
   };
 
@@ -133,11 +153,26 @@ export default function EntrenamientoManual() {
     const ejerciciosFormateados = ejercicios.map((ej) => ({
       ejercicioId: rutina?.ejercicios.find((e) => e.nombre === ej.nombre)?.id || `manual-${Date.now()}`,
       nombre: ej.nombre,
-      series: ej.series.map((s) => ({
-        peso: parseFloat(s.peso),
-        reps: parseInt(s.reps),
-        tiempoSerie: parseInt(s.tiempoSerie) || 0,
-      })),
+      series: ej.series.map((s) => {
+        const serieFormateada = {
+          peso: parseFloat(s.peso),
+          reps: parseInt(s.reps),
+          tiempoSerie: parseInt(s.tiempoSerie) || 0,
+        };
+
+        // Agregar dropsets si existen
+        if (s.dropsets && s.dropsets.length > 0) {
+          const dropsetsValidos = s.dropsets.filter(d => d.peso && d.reps);
+          if (dropsetsValidos.length > 0) {
+            serieFormateada.dropsets = dropsetsValidos.map(d => ({
+              peso: parseFloat(d.peso),
+              reps: parseInt(d.reps),
+            }));
+          }
+        }
+
+        return serieFormateada;
+      }),
       tiempoDescansoTotal: 0,
     }));
 
@@ -256,59 +291,118 @@ export default function EntrenamientoManual() {
               </div>
 
               {ejercicio.series.map((serie, serieIdx) => (
-                <div key={serieIdx} className="flex gap-2 items-end">
-                  <div className="flex-1">
-                    <label className="block text-xs text-gray-600 mb-1">
-                      Peso (kg) *
-                    </label>
-                    <input
-                      type="number"
-                      step="0.5"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      value={serie.peso}
-                      onChange={(e) =>
-                        actualizarSerie(ejercicioIdx, serieIdx, 'peso', e.target.value)
-                      }
-                      placeholder="20"
-                    />
+                <div key={serieIdx} className="border rounded-lg p-3 bg-gray-50">
+                  <div className="flex gap-2 items-end mb-3">
+                    <div className="flex-1">
+                      <label className="block text-xs text-gray-600 mb-1">
+                        Peso (kg) *
+                      </label>
+                      <input
+                        type="number"
+                        step="0.5"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        value={serie.peso}
+                        onChange={(e) =>
+                          actualizarSerie(ejercicioIdx, serieIdx, 'peso', e.target.value)
+                        }
+                        placeholder="20"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <label className="block text-xs text-gray-600 mb-1">
+                        Reps *
+                      </label>
+                      <input
+                        type="number"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        value={serie.reps}
+                        onChange={(e) =>
+                          actualizarSerie(ejercicioIdx, serieIdx, 'reps', e.target.value)
+                        }
+                        placeholder="10"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <label className="block text-xs text-gray-600 mb-1">
+                        Tiempo (seg)
+                      </label>
+                      <input
+                        type="number"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        value={serie.tiempoSerie}
+                        onChange={(e) =>
+                          actualizarSerie(ejercicioIdx, serieIdx, 'tiempoSerie', e.target.value)
+                        }
+                        placeholder="45"
+                      />
+                    </div>
+                    {ejercicio.series.length > 1 && (
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={() => eliminarSerie(ejercicioIdx, serieIdx)}
+                      >
+                        <X size={16} />
+                      </Button>
+                    )}
                   </div>
-                  <div className="flex-1">
-                    <label className="block text-xs text-gray-600 mb-1">
-                      Reps *
-                    </label>
-                    <input
-                      type="number"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      value={serie.reps}
-                      onChange={(e) =>
-                        actualizarSerie(ejercicioIdx, serieIdx, 'reps', e.target.value)
-                      }
-                      placeholder="10"
-                    />
+
+                  {/* Sección de Dropsets */}
+                  <div className="border-t pt-2 mt-2">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-1">
+                        <TrendingDown size={14} className="text-orange-600" />
+                        <label className="text-xs font-medium text-gray-700">Dropsets</label>
+                      </div>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => agregarDropset(ejercicioIdx, serieIdx)}
+                        className="text-xs py-1 px-2"
+                      >
+                        <Plus size={12} className="mr-1" />
+                        Agregar
+                      </Button>
+                    </div>
+
+                    {serie.dropsets && serie.dropsets.length > 0 && (
+                      <div className="space-y-2">
+                        {serie.dropsets.map((dropset, dropsetIdx) => (
+                          <div key={dropsetIdx} className="flex gap-2 items-end">
+                            <div className="flex-1">
+                              <input
+                                type="number"
+                                step="0.5"
+                                className="w-full px-2 py-1 text-sm border border-orange-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                value={dropset.peso}
+                                onChange={(e) =>
+                                  actualizarDropset(ejercicioIdx, serieIdx, dropsetIdx, 'peso', e.target.value)
+                                }
+                                placeholder="Peso"
+                              />
+                            </div>
+                            <div className="flex-1">
+                              <input
+                                type="number"
+                                className="w-full px-2 py-1 text-sm border border-orange-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                value={dropset.reps}
+                                onChange={(e) =>
+                                  actualizarDropset(ejercicioIdx, serieIdx, dropsetIdx, 'reps', e.target.value)
+                                }
+                                placeholder="Reps"
+                              />
+                            </div>
+                            <button
+                              onClick={() => eliminarDropset(ejercicioIdx, serieIdx, dropsetIdx)}
+                              className="text-red-600 hover:text-red-700 p-1"
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                  <div className="flex-1">
-                    <label className="block text-xs text-gray-600 mb-1">
-                      Tiempo (seg)
-                    </label>
-                    <input
-                      type="number"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      value={serie.tiempoSerie}
-                      onChange={(e) =>
-                        actualizarSerie(ejercicioIdx, serieIdx, 'tiempoSerie', e.target.value)
-                      }
-                      placeholder="45"
-                    />
-                  </div>
-                  {ejercicio.series.length > 1 && (
-                    <Button
-                      variant="danger"
-                      size="sm"
-                      onClick={() => eliminarSerie(ejercicioIdx, serieIdx)}
-                    >
-                      <X size={16} />
-                    </Button>
-                  )}
                 </div>
               ))}
             </div>

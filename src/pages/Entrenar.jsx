@@ -6,7 +6,7 @@ import Button from '../components/Button';
 import Input from '../components/Input';
 import Timer from '../components/Timer';
 import Stopwatch from '../components/Stopwatch';
-import { Check, ChevronRight, Clock } from 'lucide-react';
+import { Check, ChevronRight, Clock, Plus, X, TrendingDown } from 'lucide-react';
 import { formatPeso, formatNumero } from '../utils/formatters';
 
 export default function Entrenar() {
@@ -27,6 +27,8 @@ export default function Entrenar() {
   const [mostrarDescanso, setMostrarDescanso] = useState(false);
   const [tiempoInicio, setTiempoInicio] = useState(null);
   const [formSerie, setFormSerie] = useState({ peso: '', reps: '' });
+  const [dropsets, setDropsets] = useState([]);
+  const [formDropset, setFormDropset] = useState({ peso: '', reps: '' });
 
   // Efecto para manejar la rutina preseleccionada desde el calendario
   useEffect(() => {
@@ -115,6 +117,25 @@ export default function Entrenar() {
   const seriesCompletadas = ejercicio?.series.length || 0;
   const totalSeries = ejercicio?.seriesPlaneadas || 0;
 
+  const agregarDropset = () => {
+    if (!formDropset.peso || !formDropset.reps) {
+      alert('Por favor ingresa el peso y las repeticiones del dropset');
+      return;
+    }
+
+    const nuevoDropset = {
+      peso: parseFloat(formDropset.peso),
+      reps: parseInt(formDropset.reps),
+    };
+
+    setDropsets([...dropsets, nuevoDropset]);
+    setFormDropset({ peso: '', reps: '' });
+  };
+
+  const eliminarDropset = (idx) => {
+    setDropsets(dropsets.filter((_, i) => i !== idx));
+  };
+
   const registrarSerie = (tiempoSerie) => {
     if (!formSerie.peso || !formSerie.reps) {
       alert('Por favor ingresa el peso y las repeticiones');
@@ -127,11 +148,18 @@ export default function Entrenar() {
       tiempoSerie: tiempoSerie,
     };
 
+    // Agregar dropsets si existen
+    if (dropsets.length > 0) {
+      nuevaSerie.dropsets = dropsets;
+    }
+
     const nuevosDatos = [...datosEntrenamiento];
     nuevosDatos[ejercicioActual].series.push(nuevaSerie);
     setDatosEntrenamiento(nuevosDatos);
 
     setFormSerie({ peso: '', reps: '' });
+    setDropsets([]); // Limpiar dropsets para la próxima serie
+    setFormDropset({ peso: '', reps: '' });
     setSerieActual(serieActual + 1);
 
     // Siempre mostrar descanso después de cada serie
@@ -294,32 +322,113 @@ export default function Entrenar() {
         {ejercicio.ultimoEntrenamiento && (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
             <p className="text-sm font-medium text-blue-900 mb-2">Último entrenamiento:</p>
-            <div className="space-y-1">
+            <div className="space-y-2">
               {ejercicio.ultimoEntrenamiento.series.map((serie, idx) => (
-                <p key={idx} className="text-sm text-blue-700">
-                  Serie {idx + 1}: {formatPeso(serie.peso)}kg × {formatNumero(serie.reps)} reps
-                </p>
+                <div key={idx}>
+                  <p className="text-sm text-blue-700">
+                    Serie {idx + 1}: {formatPeso(serie.peso)}kg × {formatNumero(serie.reps)} reps
+                  </p>
+                  {serie.dropsets && serie.dropsets.length > 0 && (
+                    <div className="ml-4 mt-1 space-y-1">
+                      {serie.dropsets.map((dropset, dropIdx) => (
+                        <p key={dropIdx} className="text-xs text-orange-600 flex items-center">
+                          <TrendingDown size={10} className="mr-1" />
+                          Dropset {dropIdx + 1}: {formatPeso(dropset.peso)}kg × {formatNumero(dropset.reps)} reps
+                        </p>
+                      ))}
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <Input
-            label="Peso (kg)"
-            type="number"
-            step="0.5"
-            value={formSerie.peso}
-            onChange={(e) => setFormSerie({ ...formSerie, peso: e.target.value })}
-            placeholder="20"
-          />
-          <Input
-            label="Repeticiones"
-            type="number"
-            value={formSerie.reps}
-            onChange={(e) => setFormSerie({ ...formSerie, reps: e.target.value })}
-            placeholder={ejercicio.repsPlaneadas.toString()}
-          />
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              label="Peso (kg)"
+              type="number"
+              step="0.5"
+              value={formSerie.peso}
+              onChange={(e) => setFormSerie({ ...formSerie, peso: e.target.value })}
+              placeholder="20"
+            />
+            <Input
+              label="Repeticiones"
+              type="number"
+              value={formSerie.reps}
+              onChange={(e) => setFormSerie({ ...formSerie, reps: e.target.value })}
+              placeholder={ejercicio.repsPlaneadas.toString()}
+            />
+          </div>
+
+          {/* Sección de Dropsets */}
+          <div className="border-t pt-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <TrendingDown size={18} className="text-orange-600" />
+                <label className="text-sm font-medium text-gray-700">
+                  Dropsets (opcional)
+                </label>
+              </div>
+              <span className="text-xs text-gray-500">
+                {dropsets.length > 0 ? `${dropsets.length} dropset(s)` : 'Sin dropsets'}
+              </span>
+            </div>
+
+            {dropsets.length > 0 && (
+              <div className="space-y-2 mb-3">
+                {dropsets.map((dropset, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between bg-orange-50 border border-orange-200 rounded-lg p-2"
+                  >
+                    <div className="flex items-center gap-2">
+                      <TrendingDown size={14} className="text-orange-600" />
+                      <span className="text-sm text-gray-700">
+                        Dropset {idx + 1}: {formatPeso(dropset.peso)}kg × {formatNumero(dropset.reps)} reps
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => eliminarDropset(idx)}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-2 mb-2">
+              <Input
+                label="Peso dropset (kg)"
+                type="number"
+                step="0.5"
+                value={formDropset.peso}
+                onChange={(e) => setFormDropset({ ...formDropset, peso: e.target.value })}
+                placeholder="15"
+              />
+              <Input
+                label="Reps dropset"
+                type="number"
+                value={formDropset.reps}
+                onChange={(e) => setFormDropset({ ...formDropset, reps: e.target.value })}
+                placeholder="8"
+              />
+            </div>
+
+            <Button
+              variant="secondary"
+              size="sm"
+              className="w-full"
+              onClick={agregarDropset}
+            >
+              <Plus size={16} className="mr-2" />
+              Agregar Dropset
+            </Button>
+          </div>
         </div>
 
         <Stopwatch
@@ -333,9 +442,23 @@ export default function Entrenar() {
               Series completadas:
             </p>
             {ejercicio.series.map((serie, idx) => (
-              <div key={idx} className="flex items-center text-sm text-gray-600 mb-1">
-                <Check size={16} className="text-green-600 mr-2" />
-                Serie {idx + 1}: {formatPeso(serie.peso)}kg × {formatNumero(serie.reps)} reps ({serie.tiempoSerie}s)
+              <div key={idx} className="mb-2">
+                <div className="flex items-center text-sm text-gray-600">
+                  <Check size={16} className="text-green-600 mr-2" />
+                  <span>
+                    Serie {idx + 1}: {formatPeso(serie.peso)}kg × {formatNumero(serie.reps)} reps ({serie.tiempoSerie}s)
+                  </span>
+                </div>
+                {serie.dropsets && serie.dropsets.length > 0 && (
+                  <div className="ml-6 mt-1 space-y-1">
+                    {serie.dropsets.map((dropset, dropIdx) => (
+                      <div key={dropIdx} className="flex items-center text-xs text-orange-600">
+                        <TrendingDown size={12} className="mr-1" />
+                        Dropset {dropIdx + 1}: {formatPeso(dropset.peso)}kg × {formatNumero(dropset.reps)} reps
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </div>

@@ -7,7 +7,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { formatPeso, formatNumero, formatVolumen } from '../utils/formatters';
-import { Trash2, AlertTriangle, Database, ChevronDown, ChevronUp, Plus } from 'lucide-react';
+import { Trash2, AlertTriangle, Database, ChevronDown, ChevronUp, Plus, TrendingDown } from 'lucide-react';
 
 export default function Progreso() {
   const navigate = useNavigate();
@@ -51,7 +51,19 @@ export default function Progreso() {
         // Calcular promedios del entrenamiento
         const pesoPromedio = ejercicio.series.reduce((sum, s) => sum + s.peso, 0) / ejercicio.series.length;
         const repsPromedio = ejercicio.series.reduce((sum, s) => sum + s.reps, 0) / ejercicio.series.length;
-        const volumenTotal = ejercicio.series.reduce((sum, s) => sum + (s.peso * s.reps), 0);
+
+        // Calcular volumen total incluyendo dropsets
+        const volumenTotal = ejercicio.series.reduce((sum, s) => {
+          let volumenSerie = s.peso * s.reps;
+
+          // Agregar volumen de dropsets si existen
+          if (s.dropsets && s.dropsets.length > 0) {
+            const volumenDropsets = s.dropsets.reduce((dsSum, ds) => dsSum + (ds.peso * ds.reps), 0);
+            volumenSerie += volumenDropsets;
+          }
+
+          return sum + volumenSerie;
+        }, 0);
 
         datosPorEntrenamiento.push({
           fecha: fecha,
@@ -413,6 +425,63 @@ export default function Progreso() {
                 </tbody>
               </table>
             </div>
+          </Card>
+
+          <Card title="Detalle de Series">
+            <div className="space-y-4">
+              {entrenamientos
+                .filter((e) => e.ejercicios.some((ej) => ej.nombre === ejercicioSeleccionado))
+                .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
+                .slice(0, 5)
+                .map((entrenamiento) => {
+                  const ejercicio = entrenamiento.ejercicios.find(
+                    (e) => e.nombre === ejercicioSeleccionado
+                  );
+
+                  return (
+                    <div key={entrenamiento.id} className="border rounded-lg p-4 bg-gray-50">
+                      <h4 className="font-semibold text-gray-900 mb-3">
+                        {format(new Date(entrenamiento.fecha), "d 'de' MMMM, HH:mm", { locale: es })}
+                      </h4>
+                      <div className="space-y-2">
+                        {ejercicio.series.map((serie, idx) => (
+                          <div key={idx} className="bg-white rounded p-3 border border-gray-200">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-sm font-medium text-gray-700">
+                                Serie {idx + 1}
+                              </span>
+                              <span className="text-sm text-gray-600">
+                                {formatPeso(serie.peso)}kg × {formatNumero(serie.reps)} reps
+                              </span>
+                            </div>
+                            {serie.dropsets && serie.dropsets.length > 0 && (
+                              <div className="ml-4 mt-2 space-y-1">
+                                {serie.dropsets.map((dropset, dropIdx) => (
+                                  <div
+                                    key={dropIdx}
+                                    className="flex items-center justify-between text-xs text-orange-600 bg-orange-50 rounded px-2 py-1"
+                                  >
+                                    <div className="flex items-center gap-1">
+                                      <TrendingDown size={12} />
+                                      <span>Dropset {dropIdx + 1}</span>
+                                    </div>
+                                    <span>
+                                      {formatPeso(dropset.peso)}kg × {formatNumero(dropset.reps)} reps
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+            <p className="text-xs text-gray-500 mt-4">
+              Mostrando los últimos 5 entrenamientos
+            </p>
           </Card>
         </>
       )}
