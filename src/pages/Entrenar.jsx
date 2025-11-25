@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import Card from '../components/Card';
 import Button from '../components/Button';
@@ -11,6 +11,7 @@ import { formatPeso, formatNumero } from '../utils/formatters';
 
 export default function Entrenar() {
   const location = useLocation();
+  const navigate = useNavigate();
   const {
     rutinas,
     guardarEntrenamiento,
@@ -40,6 +41,59 @@ export default function Entrenar() {
       inicializarDatos();
     }
   }, [rutinaSeleccionada]);
+
+  // Candado de seguridad: advertir antes de recargar la página o cerrarla
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      // Solo mostrar advertencia si hay un entrenamiento activo
+      if (rutinaSeleccionada && tiempoInicio) {
+        e.preventDefault();
+        e.returnValue = ''; // Chrome requiere returnValue
+        return ''; // Algunos navegadores muestran este mensaje
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [rutinaSeleccionada, tiempoInicio]);
+
+  // Candado de seguridad: advertir antes de usar el botón atrás del navegador
+  useEffect(() => {
+    if (!rutinaSeleccionada || !tiempoInicio) return;
+
+    // Agregar una entrada al historial para interceptar el botón "atrás"
+    window.history.pushState(null, '', window.location.pathname);
+
+    const handlePopState = (e) => {
+      if (rutinaSeleccionada && tiempoInicio) {
+        const confirmar = window.confirm(
+          '¿Estás seguro de que quieres salir? Se perderá todo el progreso del entrenamiento actual.'
+        );
+
+        if (confirmar) {
+          // Usuario confirma salir, limpiar estado y permitir navegación
+          setRutinaSeleccionada(null);
+          setEjercicioActual(0);
+          setSerieActual(0);
+          setDatosEntrenamiento([]);
+          setTiempoInicio(null);
+          navigate(-1);
+        } else {
+          // Usuario cancela, mantener en la página
+          window.history.pushState(null, '', window.location.pathname);
+        }
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [rutinaSeleccionada, tiempoInicio, navigate]);
 
   const inicializarDatos = () => {
     const datos = rutinaSeleccionada.ejercicios.map((ej) => {

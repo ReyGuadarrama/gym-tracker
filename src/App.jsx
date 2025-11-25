@@ -6,6 +6,7 @@ import Rutinas from './pages/Rutinas';
 import Calendario from './pages/Calendario';
 import Entrenar from './pages/Entrenar';
 import Progreso from './pages/Progreso';
+import EntrenamientoManual from './pages/EntrenamientoManual';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
             <Route path="calendario" element={<Calendario />} />
             <Route path="entrenar" element={<Entrenar />} />
             <Route path="progreso" element={<Progreso />} />
+            <Route path="entrenamiento-manual" element={<EntrenamientoManual />} />
           </Route>
         </Routes>
       </BrowserRouter>

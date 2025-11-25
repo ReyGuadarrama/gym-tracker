@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import Card from '../components/Card';
 import Button from '../components/Button';
@@ -6,9 +7,10 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { formatPeso, formatNumero, formatVolumen } from '../utils/formatters';
-import { Trash2, AlertTriangle, Database, ChevronDown, ChevronUp } from 'lucide-react';
+import { Trash2, AlertTriangle, Database, ChevronDown, ChevronUp, Plus } from 'lucide-react';
 
 export default function Progreso() {
+  const navigate = useNavigate();
   const {
     entrenamientos,
     eliminarEntrenamiento,
@@ -181,10 +183,23 @@ export default function Progreso() {
   if (entrenamientos.length === 0) {
     return (
       <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-gray-900">Progreso</h2>
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-bold text-gray-900">Progreso</h2>
+          <Button
+            variant="secondary"
+            onClick={() => navigate('/entrenamiento-manual')}
+            className="flex items-center"
+          >
+            <Plus size={20} className="mr-2" />
+            Agregar Entrenamiento Manual
+          </Button>
+        </div>
         <Card className="text-center py-8">
-          <p className="text-gray-600">
+          <p className="text-gray-600 mb-4">
             Aún no tienes entrenamientos registrados. ¡Comienza a entrenar para ver tu progreso!
+          </p>
+          <p className="text-sm text-gray-500">
+            También puedes agregar entrenamientos pasados manualmente usando el botón de arriba.
           </p>
         </Card>
       </div>
@@ -193,7 +208,17 @@ export default function Progreso() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-900">Progreso</h2>
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-gray-900">Progreso</h2>
+        <Button
+          variant="secondary"
+          onClick={() => navigate('/entrenamiento-manual')}
+          className="flex items-center"
+        >
+          <Plus size={20} className="mr-2" />
+          Agregar Entrenamiento Manual
+        </Button>
+      </div>
 
       <Card>
         <label className="block text-sm font-medium text-gray-700 mb-2">

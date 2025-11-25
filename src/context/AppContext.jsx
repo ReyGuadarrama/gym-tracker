@@ -82,6 +82,16 @@ export const AppProvider = ({ children }) => {
     return nuevoEntrenamiento;
   };
 
+  const guardarEntrenamientoManual = (entrenamiento, fechaPersonalizada) => {
+    const nuevoEntrenamiento = {
+      ...entrenamiento,
+      id: Date.now().toString(),
+      fecha: fechaPersonalizada || new Date().toISOString(),
+    };
+    setEntrenamientos([...entrenamientos, nuevoEntrenamiento]);
+    return nuevoEntrenamiento;
+  };
+
   const obtenerUltimoEntrenamiento = (rutinaId, ejercicioId) => {
     const entrenamientosRutina = entrenamientos
       .filter(e => e.rutinaId === rutinaId)
@@ -279,6 +289,7 @@ export const AppProvider = ({ children }) => {
     programarRutina,
     obtenerRutinaPorFecha,
     guardarEntrenamiento,
+    guardarEntrenamientoManual,
     obtenerUltimoEntrenamiento,
     obtenerHistorialEjercicio,
     obtenerTiempoPromedioRutina,
