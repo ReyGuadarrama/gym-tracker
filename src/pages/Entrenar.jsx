@@ -64,7 +64,7 @@ export default function Entrenar() {
   const registrarSerie = (tiempoSerie) => {
     if (!formSerie.peso || !formSerie.reps) {
       alert('Por favor ingresa el peso y las repeticiones');
-      return;
+      return false; // Retornar false si falla la validación
     }
 
     const nuevaSerie = {
@@ -80,13 +80,9 @@ export default function Entrenar() {
     setFormSerie({ peso: '', reps: '' });
     setSerieActual(serieActual + 1);
 
-    // Si no es la última serie, mostrar descanso
-    if (serieActual + 1 < totalSeries) {
-      setMostrarDescanso(true);
-    } else {
-      // Siguiente ejercicio
-      siguienteEjercicio();
-    }
+    // Siempre mostrar descanso después de cada serie
+    setMostrarDescanso(true);
+    return true; // Retornar true si se registró exitosamente
   };
 
   const siguienteEjercicio = () => {
@@ -126,6 +122,10 @@ export default function Entrenar() {
 
   const omitirDescanso = () => {
     setMostrarDescanso(false);
+    // Si se completaron todas las series, pasar al siguiente ejercicio
+    if (serieActual >= totalSeries) {
+      siguienteEjercicio();
+    }
   };
 
   if (!rutinaSeleccionada) {

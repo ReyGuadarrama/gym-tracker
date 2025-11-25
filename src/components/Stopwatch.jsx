@@ -24,8 +24,15 @@ export default function Stopwatch({ onStop, label = 'Cronómetro' }) {
 
   const detener = () => {
     setActivo(false);
-    if (onStop) onStop(tiempo);
-    setTiempo(0);
+    if (onStop) {
+      const resultado = onStop(tiempo);
+      // Solo resetear el tiempo si la operación fue exitosa
+      if (resultado !== false) {
+        setTiempo(0);
+      }
+    } else {
+      setTiempo(0);
+    }
   };
 
   const formatTiempo = (segundos) => {
